@@ -1,0 +1,53 @@
+import tensorflow as tf
+import numpy as np
+from keras.preprocessing import image
+import scipy
+from keras.preprocessing.image import ImageDataGenerator
+training_set = ImageDataGenerator(rescale = 1./255, 
+                                  shear_range = 0.2,
+                                  zoom_range = 0.2,
+                                  horizontal_flip = True)
+
+train_set = training_set.flow_from_directory('Tree_NoTree_Dataset/train',
+                                            target_size=(64,64),
+                                            batch_size = 32,
+                                            class_mode='binary')
+testing_set = ImageDataGenerator(rescale = 1./255)
+
+test_set = testing_set.flow_from_directory('Tree_NoTree_Dataset/Test',
+                                            target_size=(64,64),
+                                            batch_size = 32,
+                                            class_mode='binary')
+tree_model = tf.keras.models.Sequential()
+tree_model.add(tf.keras.layers.Conv2D(filters=64,
+                                     kernel_size=3,
+                                     activation='relu',
+                                     input_shape=[64,64,3]))
+
+tree_model.add(tf.keras.layers.MaxPool2D(pool_size=2,
+                                        strides = 2))
+tree_model.add(tf.keras.layers.Conv2D(filters=64,
+                                     kernel_size=3,
+                                     activation='relu',
+                                     input_shape=[64,64,2]))
+
+tree_model.add(tf.keras.layers.MaxPool2D(pool_size=2,
+                                        strides = 2))
+tree_model.add(tf.keras.layers.Dropout(0.5))
+tree_model.add(tf.keras.layers.Flatten())
+tree_model.add(tf.keras.layers.Dense(units=64,activation='relu'))
+tree_model.add(tf.keras.layers.Dense(units=1,activation='sigmoid'))
+tree_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+tree_model.fit(x=train_set, validation_data=test_set, epochs=10)
+from keras.preprocessing import image
+test_image = tf.keras.utils.load_img('tree.jpeg', target_size=(64,64))
+test_image = tf.keras.utils.img_to_array(test_image)
+test_image = np.expand_dims(test_image,axis=0)
+result = tree_model.predict(test_image)
+train_set.class_indices
+
+if result[0][0]==0:
+    print('Not Tree')
+else:
+    print('Tree')
+    
