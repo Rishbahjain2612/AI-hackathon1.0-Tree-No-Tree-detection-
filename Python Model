@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from keras.preprocessing import image
-import scipy
+
 from keras.preprocessing.image import ImageDataGenerator
 training_set = ImageDataGenerator(rescale = 1./255, 
                                   shear_range = 0.2,
